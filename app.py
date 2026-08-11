@@ -1,9 +1,18 @@
 from PIL import Image
 import platform
 
-image = Image.open("photo.jpeg")
-image = image.convert("RGB")
-image = image.resize((600, 400))
+from PIL import Image
+
+photo = Image.open("photo.jpeg").convert("RGB")
+
+# Create an Inky-sized white canvas
+image = Image.new("RGB", (600, 400), "white")
+
+# Centre the photo without resizing it
+x = (600 - photo.width) // 2
+y = (400 - photo.height) // 2
+
+image.paste(photo, (x, y))
 
 if platform.system() == "Darwin":
     image.show()
