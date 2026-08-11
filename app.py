@@ -1,23 +1,79 @@
-from PIL import Image
-import platform
+from pathlib import Path
 
-from PIL import Image
+import gpiod
+import gpiodevice
+from gpiod.line import Bias, Direction, Edge
+from PIL import Image, ImageOps
 
-photo = Image.open("photo.jpeg").convert("RGB")
+from inky.auto import auto
 
-# Create an Inky-sized white canvas
-image = Image.new("RGB", (600, 400), "white")
 
-# Centre the photo without resizing it
-x = (600 - photo.width) // 2
-y = (400 - photo.height) // 2
+WIDTH = 600
+HEIGHT = 400
 
-image.paste(photo, (x, y))
+BUTTONS = [5, 6, 16, 24]
 
-if platform.system() == "Darwin":
-    image.show()
-else:
-    from inky.auto import auto
-    inky = auto()
+PHOTOS = [
+    "photo1.jpeg",
+    "photo2.jpeg",
+    "photo3.jpeg",
+    "photo4.jpeg",
+]
+
+
+inky = auto()
+
+base_dir = Path(__file__).parent
+
+
+def display_photo(filename):
+    photo = Image.open(base_dir / filename).convert("RGB")
+
+    # Fit inside the display without stretching.
+    photo.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
+
+    # White 600x400 canvas.
+    image = Image.new("RGB", (WIDTH, HEIGHT), "white")
+
+    x = (WIDTH - photo.width) // 2
+    y = (HEIGHT - photo.height) // 2
+
+    image.paste(photo, (x, y))
+
     inky.set_image(image)
     inky.show()
+
+
+input_settings = gpiod.LineSettings(
+    direction=Direction.INPUT,
+    bias=Bias.PULL_UP,
+    edge_detection=Edge.FALLING,
+)
+
+chip = gpiodevice.find_chip_by_platform()
+
+offsets = [
+    chip.line_offset_from_id(button)
+    for button in BUTTONS
+]
+
+line_config = dict.fromkeys(offsets, input_settings)
+
+request = chip.request_lines(
+    consumer="raspberry-sync",
+    config=line_config,
+)
+
+
+print("Waiting for button presses...")
+
+
+while True:
+    for event in request.read_edge_events():
+        index = offsets.index(event.line_offset)
+
+        filename = PHOTOS[index]
+
+        print(f"Button {index + 1}: {filename}")
+
+        display_photo(filename)
