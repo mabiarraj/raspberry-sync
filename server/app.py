@@ -7,6 +7,12 @@ from fastapi.responses import FileResponse
 app = FastAPI()
 
 image_path = Path("/app/data/image.jpg")
+index_path = Path(__file__).parent / "index.html"
+
+
+@app.get("/")
+def index():
+    return FileResponse(index_path)
 
 
 @app.post("/image")
