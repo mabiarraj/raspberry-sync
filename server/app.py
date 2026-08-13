@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 from fastapi import Body, FastAPI
@@ -16,3 +17,9 @@ def upload_image(image: bytes = Body(..., media_type="application/octet-stream")
 @app.get("/image")
 def get_image():
     return FileResponse(image_path)
+
+
+@app.get("/metadata")
+def get_metadata():
+    image = image_path.read_bytes()
+    return {"version": hashlib.sha256(image).hexdigest()}
