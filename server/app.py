@@ -5,7 +5,8 @@ from fastapi import Body, FastAPI
 from fastapi.responses import FileResponse
 
 app = FastAPI()
-image_path = Path(__file__).parent / "image.jpg"
+
+image_path = Path("/app/data/image.jpg")
 
 
 @app.post("/image")
@@ -21,5 +22,8 @@ def get_image():
 
 @app.get("/metadata")
 def get_metadata():
+    if not image_path.exists():
+        return {"version": None}
+
     image = image_path.read_bytes()
     return {"version": hashlib.sha256(image).hexdigest()}
