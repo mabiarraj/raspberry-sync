@@ -1,27 +1,22 @@
+import io
 import platform
-from pathlib import Path
 
+import requests
 from PIL import Image
-
-from renderer import render_message
 
 WIDTH = 600
 HEIGHT = 400
-ROOT = Path(__file__).parent.parent
+IMAGE_URL = "https://raspberry-sync-production.up.railway.app/image"
 
 
 def get_image():
-    img_dir = ROOT / "img"
-    images = [path for path in img_dir.iterdir() if path.is_file()] if img_dir.exists() else []
+    response = requests.get(IMAGE_URL)
+    photo = Image.open(io.BytesIO(response.content)).convert("RGB")
+    photo.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
 
-    if images:
-        photo = Image.open(images[0]).convert("RGB")
-        photo.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
-        image = Image.new("RGB", (WIDTH, HEIGHT), "white")
-        image.paste(photo, ((WIDTH - photo.width) // 2, (HEIGHT - photo.height) // 2))
-        return image
-
-    return render_message("Hello Aryana")
+    image = Image.new("RGB", (WIDTH, HEIGHT), "white")
+    image.paste(photo, ((WIDTH - photo.width) // 2, (HEIGHT - photo.height) // 2))
+    return image
 
 
 image = get_image()
