@@ -1,16 +1,20 @@
 import io
 import platform
+import time
+from pathlib import Path
 
 import requests
 from PIL import Image
 
 WIDTH = 600
 HEIGHT = 400
-IMAGE_URL = "https://raspberry-sync-production.up.railway.app/image"
+BASE_URL = "https://raspberry-sync-production.up.railway.app"
+VERSION_PATH = Path(__file__).parent / "version.txt"
+POLL_SECONDS = 10
 
 
 def get_image():
-    response = requests.get(IMAGE_URL)
+    response = requests.get(f"{BASE_URL}/image")
     photo = Image.open(io.BytesIO(response.content)).convert("RGB")
     photo.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
 
@@ -19,13 +23,27 @@ def get_image():
     return image
 
 
-image = get_image()
+def display_image(image):
+    if platform.system() == "Darwin":
+        image.show()
+        return
 
-if platform.system() == "Darwin":
-    image.show()
-else:
     from inky.auto import auto
 
     inky = auto()
     inky.set_image(image)
     inky.show()
+
+
+def get_local_version():
+    return VERSION_PATH.read_text() if VERSION_PATH.exists() else None
+
+
+while True:
+    version = requests.get(f"{BASE_URL}/metadata").json()["version"]
+
+    if version != get_local_version():
+        display_image(get_image())
+        VERSION_PATH.write_text(version)
+
+    time.sleep(POLL_SECONDS)
