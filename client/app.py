@@ -43,6 +43,7 @@ while True:
     version = requests.get(f"{BASE_URL}/metadata").json()["version"]
 
     if version != get_local_version():
+        print(f"New image detected: {version}")
         display_image(get_image())
         VERSION_PATH.write_text(version)
 
