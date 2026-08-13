@@ -14,8 +14,15 @@ def get_image():
     images = [path for path in img_dir.iterdir() if path.is_file()] if img_dir.exists() else []
 
     if images:
-        image = Image.open(images[0]).convert("RGB")
-        image.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
+        photo = Image.open(images[0]).convert("RGB")
+        photo.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
+
+        image = Image.new("RGB", (WIDTH, HEIGHT), "white")
+
+        x = (WIDTH - photo.width) // 2
+        y = (HEIGHT - photo.height) // 2
+
+        image.paste(photo, (x, y))
         return image
 
     return render_message("Hello Aryana")
