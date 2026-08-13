@@ -7,10 +7,19 @@
             margin: 0;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 24px;
             background: black;
             font-family: sans-serif;
+        }
+
+        img {
+            width: min(90vw, 600px);
+            max-height: 65vh;
+            object-fit: contain;
+            border-radius: 16px;
         }
 
         #file {
@@ -29,6 +38,8 @@
     </style>
 </head>
 <body>
+    <img id="current" src="/image" alt="Current photo">
+
     <input id="file" type="file" accept="image/*" onchange="upload()">
     <label for="file">Upload</label>
 
@@ -44,7 +55,7 @@
                 body: file
             })
 
-            alert("Uploaded!")
+            document.getElementById("current").src = "/image?" + Date.now()
         }
     </script>
 </body>
