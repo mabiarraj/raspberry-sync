@@ -1,11 +1,18 @@
 import io
 import platform
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 WIDTH = 600
 HEIGHT = 400
 
+def enhance_photo(photo):
+    photo = ImageEnhance.Contrast(photo).enhance(1.15)
+    photo = ImageEnhance.Color(photo).enhance(1.25)
+    photo = ImageEnhance.Sharpness(photo).enhance(1.10)
+    photo = ImageEnhance.Brightness(photo).enhance(1.05)
+
+    return photo
 
 def display_image(data):
     photo = Image.open(io.BytesIO(data)).convert("RGB")
