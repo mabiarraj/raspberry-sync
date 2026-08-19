@@ -6,6 +6,7 @@ from PIL import Image, ImageEnhance
 WIDTH = 600
 HEIGHT = 400
 
+
 def enhance_photo(photo):
     photo = ImageEnhance.Contrast(photo).enhance(1.15)
     photo = ImageEnhance.Color(photo).enhance(1.25)
@@ -14,8 +15,13 @@ def enhance_photo(photo):
 
     return photo
 
-def display_image(data):
+
+def display_image(data, enhanced=False):
     photo = Image.open(io.BytesIO(data)).convert("RGB")
+
+    if enhanced:
+        photo = enhance_photo(photo)
+
     photo.thumbnail((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
 
     image = Image.new("RGB", (WIDTH, HEIGHT), "white")
